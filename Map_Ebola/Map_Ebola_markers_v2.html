@@ -4,7 +4,7 @@
    <script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
    <script src="http://d3js.org/queue.v1.min.js"></script>
-
+  
 <style>
 .legend {
     padding: 0px 0px;
@@ -28,25 +28,12 @@
 <script>
 
 queue()
-    .defer(d3.json, 'data_1.json')
+    .defer(d3.json, 'data_ebola.json')
     .defer(d3.json, 'geojson_countries.json')
-    .await(makeMap);
+    .await(makeMap)
 
-function makeMap(error, data_1, gjson_1) {
-
-    function matchKey(datapoint, key_variable){
-		colorValue = parseFloat(key_variable[0][datapoint]);
-		if (colorValue > 0) {
-			return colorValue;
-		} else {
-			return 0.0
-		}
-    };
-
-    var color = d3.scale.threshold()
-				.domain([1, 1000, 2000, 3000])
-				.range(['#F1EEF6', '#D4B9DA', '#C994C7', '#DF65B0', '#E7298A']);
-				
+function makeMap(error, data_ebola, geo_json) {
+ 
     var map = L.map('map').setView([30, -20], 2);
 
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -54,9 +41,28 @@ function makeMap(error, data_1, gjson_1) {
         attribution: 'Map data (c) <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
     }).addTo(map);
 
+	for (country in data_ebola[0]) {
+		marker = L.marker(data_ebola[0][country].latlng);
+		marker.bindPopup(country);
+		map.addLayer(marker);
+	}
+	
+	var color = d3.scale.threshold()
+              .domain([1, 1000, 2000, 3000])
+              .range(['#F1EEF6', '#D4B9DA', '#C994C7', '#DF65B0', '#E7298A']);
+
+	function matchKey(datapoint, key_variable){
+		countryExists = key_variable[0][datapoint];
+		if (! countryExists) {
+			return 0.0;
+		} else {
+			return parseFloat(countryExists.cases);
+		}
+    };
+	
     function style_1(feature) {
 		return {
-			fillColor: color(matchKey(feature.id, data_1)),
+			fillColor: color(matchKey(feature.id, data_ebola)),
 			weight: 1,
 			opacity: 0.2,
 			color: 'black',
@@ -64,9 +70,9 @@ function makeMap(error, data_1, gjson_1) {
 		};
 	};
 
-    gJson_layer_1 = L.geoJson(gjson_1, {style: style_1}).addTo(map);
+    gJson_layer_1 = L.geoJson(geo_json, {style: style_1}).addTo(map)
 
-    var legend = L.control({position: 'topright'});
+	var legend = L.control({position: 'topright'});
 
     legend.onAdd = function (map) {var div = L.DomUtil.create('div', 'legend'); return div};
     legend.addTo(map);
