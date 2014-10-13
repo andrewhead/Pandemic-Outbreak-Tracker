@@ -15,7 +15,7 @@
         $.widget("custom.logSlider", $.ui.slider, {
             options: {
                 min: 0,
-                maximum: 10000,
+                mx: 10000,
                 logPower: 2,
                 callback: undefined
             },
@@ -25,30 +25,46 @@
                 if (self.options['callback'] !== undefined) {
                     var callback = self.options['callback'];
                     self._setOption("slide", function(event, ui) {
+                        console.log(ui.value);
                         callback(event, Math.pow(ui.value, self.options['logPower']));
                     });
                 }
             },
             _setOption: function( key, value ) {
-                if (key === "maximum") {
-                    this._setOption("max", Math.pow(value, 1 / this.options['logPower']));
+                var valueUpdated = false;
+                if (key === "mx") {
+                    this._setOption("max", Math.ceil(Math.pow(value, 1 / this.options['logPower'])));
+                    if (this.options['value'] > this.options['max']) {
+                        this.options['value'] = this.options['max'];
+                    }
+                    valueUpdated = true;
+                } else if (key === "vl") {
+                    this._setOption("value", Math.ceil(Math.pow(value, 1 / this.options['logPower'])));
+                    valueUpdated = true;
                 } else {
                     this._super( key, value );
                 };
+
+                // Force calling of callback when value is updated from outside
+                if (valueUpdated === true) {
+                    var sliderValue = this.options['value'];
+                    var scaledValue = Math.pow(sliderValue, this.options['logPower']);
+                    this.options['callback'](event, scaledValue);
+                }
             }
         })
         
         /* Updates a list of countries that satisfy the query criteria */
         function updateCountries() {
             countries = getRiskCountries(
-                disease="ebola",
+                disease=$("#disease_select").val(),
                 date="20141005",
-                minLifeExpectancy=40,
-                maxLifeExpectancy=82,
+                minLifeExpectancy=$("#min_life_exp").val(),
+                maxLifeExpectancy=$("#max_life_exp").val(),
                 minRoutesInto=$("#routes").val(),
                 considerBorderRisk=false,
                 minLocalCases=$("#local_cases").val(),
-                borderingCases=10000
+                borderingCases=$("#border_cases").val()
             );
             $("#countries").val(String(countries));
         };
@@ -87,41 +103,85 @@
             return maxCases;
         }
 
-        function setSliderBounds(disease) {
+        function getLifeExpectancyRange(data) {
+            var minExpectancy = 1000;
+            var maxExpectancy = 0;
+            var expectancies = data.lifeExpectancies;
+            for (var country in expectancies) {
+                if (expectancies.hasOwnProperty(country)) {
+                    if (expectancies[country] < minExpectancy) {
+                        minExpectancy = expectancies[country];
+                    }
+                    if (expectancies[country] > maxExpectancy) {
+                        maxExpectancy = expectancies[country];
+                    }
+                }
+            }
+            return [minExpectancy, maxExpectancy];
+        }
+
+        function updateSliders(disease) {
+            
             var data = getData();
+    
             var maxCases = getMaxCases(data, disease);
             var maxRoutes = getMaxRoutes(data);
-            $("#routes_slider").logSlider("option", "maximum", maxRoutes);
-            $("#local_cases_slider").logSlider("option", "maximum", maxCases);
-            $("#border_cases_slider").logSlider("option", "maximum", maxCases);
+            var expectancyRange = getLifeExpectancyRange(data);
+
+            // Set maximum and minimum slider values
+            $("#routes_slider").logSlider("option", "mx", maxRoutes);
+            $("#local_cases_slider").logSlider("option", "mx", maxCases);
+            $("#border_cases_slider").logSlider("option", "mx", maxCases);
+            $("#life_exp_slider").slider("option", "min", expectancyRange[0]);
+            $("#life_exp_slider").slider("option", "max", expectancyRange[1]);
+
+            // Initialize or reset values as needed
+            if ($("#min_life_exp").val() === "" || $("#max_life_exp").val() === "") {
+                $("#life_exp_slider").slider("option", "values", [expectancyRange[0], expectancyRange[1]]);
+                $("#min_life_exp").val(expectancyRange[0]);
+                $("#max_life_exp").val(expectancyRange[1]);
+            }
         }
 
         $(function() {
-            /* Initializes logarithmic sliders */
+            /* Initialize logarithmic sliders */
             $("#routes_slider").logSlider({
                 callback: function(event, value) {
                     $("#routes").val(value);
+                    updateCountries();
                 },
             });
             $("#local_cases_slider").logSlider({
                 callback: function(event, value) {
                     $("#local_cases").val(value);
+                    updateCountries();
                 },
             });
             $("#border_cases_slider").logSlider({
                 callback: function(event, value) {
                     $("#border_cases").val(value);
+                    updateCountries();
                 },
+            });
+
+            /* Initialize additional controls */
+            var lifeExpSlider = $("#life_exp_slider").slider({
+                range: true,
+                slide: function(event, ui) {
+                    $("#min_life_exp").val(ui.values[0]);
+                    $("#max_life_exp").val(ui.values[1]);
+                    updateCountries();
+                }
             });
 
             /* Initialize disease selector. */
             var diseaseSelect = $("#disease_select").selectmenu({
                 change: function(event, ui) {
-                    console.log(ui.item.value);
-                    setSliderBounds(ui.item.value);
+                    updateSliders(ui.item.value);
                 }
             });
-            setSliderBounds(diseaseSelect.val());
+            updateSliders(diseaseSelect.val());
+            updateCountries();
         });
     </script>
 </head>
@@ -135,18 +195,24 @@
         <div id="routes_slider" class="slider"></div>
         <p>
             <input type="text" id="routes" class="counter" readonly/>
-            <label for="routes">flight routes from affected country.</label>
+            <label for="routes">flight routes from affected country</label>
         </p>
         <div id="local_cases_slider" class="slider"></div>
         <p>
             <input type="text" id="local_cases" class="counter" readonly/>
-            <label for="local_cases">cases or more in country.</label>
+            <label for="local_cases">cases or more in country</label>
         </p>
         <div id="border_cases_slider" class="slider"></div>
         <p>
             <input type="text" id="border_cases" class="counter" readonly/>
-            <label for="border_cases">cases or more in bordering country.</label>
+            <label for="border_cases">cases or more in bordering country</label>
         </p>
+        <div id="life_exp_slider" class="slider"></div>
+        <p>
+            <input type="text" id="min_life_exp" class="counter" readonly/>
+            <label>&nbsp;to&nbsp;
+            <input type="text" id="max_life_exp" class="counter" readonly/>
+            <label for="life_exp">years life expectancy</label>
         <p>
             <label for="countries">At-risk countries</label>
             <input type="text" id="countries" readonly/>
