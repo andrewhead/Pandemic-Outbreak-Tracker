@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <script src="query.js"></script>
+    <link rel="stylesheet" href="controls.css" />
+    <script>
+
+        /* Slider with logarithmic scale */
+        function logSlider(divId, max, logPower, callback) {
+            $(divId).slider({
+                min: 0,
+                max: Math.pow(max, (1 / logPower)),
+                slide: function(event, ui) {
+                    callback(event, Math.pow(ui.value, logPower));
+                }
+            });
+        };
+
+        /* Updates a list of countries that satisfy the query criteria */
+        function updateCountries() {
+            countries = getRiskCountries(
+                disease="ebola",
+                date="20141005",
+                minLifeExpectancy=40,
+                maxLifeExpectancy=82,
+                minRoutesInto=$("#routes").val(),
+                considerBorderRisk=false,
+                minLocalCases=$("#local_cases").val(),
+                borderingCases=10000
+            );
+            $("#countries").val(String(countries));
+        };
+
+        /* Checks to find absolute maxima of slider values */
+        var data = getData();
+        var maxRoutes = 0;
+        for (var country in data.flights) {
+            if (data.flights.hasOwnProperty(country)) {
+                for (var adjCountry in data.flights[country]) {
+                    if (data.flights[country].hasOwnProperty(adjCountry)) {
+                        if (data.flights[country][adjCountry] > maxRoutes) {
+                            maxRoutes = data.flights[country][adjCountry];
+                        }
+                    }
+                }
+            }
+        }
+        // Note: this check should be performed on a disease-by-disease basis
+        var maxCases = 0;
+        var disease = "ebola";
+        var diseaseData = data.cases[disease];
+        for (var date in diseaseData) {
+            if (diseaseData.hasOwnProperty(date)) {
+                var dateData = diseaseData[date];
+                for (var country in dateData) {
+                    if (dateData.hasOwnProperty(country)) {
+                        if (dateData[country] > maxCases) {
+                            maxCases = dateData[country];
+                        }
+                    }
+                }
+            }
+        }
+
+        /* Initializes all of the logarithmic sliders */
+        $(function() {
+            logSlider("#routes_slider", maxRoutes, 2, function(event, value) {
+                $("#routes").val(value);
+                updateCountries();
+            });
+            logSlider("#local_cases_slider", maxCases, 2, function(event, value) {
+                $("#local_cases").val(value);
+                updateCountries();
+            });
+            logSlider("#border_cases_slider", maxCases, 2, function(event, value) {
+                $("#border_cases").val(value);
+                updateCountries();
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <div>
+        <div id="routes_slider" class="slider"></div>
+        <p>
+            <input type="text" id="routes" class="counter" readonly/>
+            <label for="routes">flight routes from affected country.</label>
+        </p>
+        <div id="local_cases_slider" class="slider"></div>
+        <p>
+            <input type="text" id="local_cases" class="counter" readonly/>
+            <label for="local_cases">cases or more in country.</label>
+        </p>
+        <div id="border_cases_slider" class="slider"></div>
+        <p>
+            <input type="text" id="border_cases" class="counter" readonly/>
+            <label for="border_cases">cases or more in bordering country.</label>
+        </p>
+        <p>
+            <label for="countries">At-risk countries</label>
+            <input type="text" id="countries" readonly/>
+        </p>
+    </div>
+</body>
