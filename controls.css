@@ -9,3 +9,8 @@ input.counter {
     width: 40px;
     text-align: center;
 }
+
+select {
+    font-size: smaller;
+    width: 200px;
+}

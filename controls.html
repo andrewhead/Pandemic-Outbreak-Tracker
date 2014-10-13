@@ -12,16 +12,32 @@
     <script>
 
         /* Slider with logarithmic scale */
-        function logSlider(divId, max, logPower, callback) {
-            $(divId).slider({
+        $.widget("custom.logSlider", $.ui.slider, {
+            options: {
                 min: 0,
-                max: Math.pow(max, (1 / logPower)),
-                slide: function(event, ui) {
-                    callback(event, Math.pow(ui.value, logPower));
+                maximum: 10000,
+                logPower: 2,
+                callback: undefined
+            },
+            _create: function() {
+                $.ui.slider.prototype._create.call(this);
+                var self = this;
+                if (self.options['callback'] !== undefined) {
+                    var callback = self.options['callback'];
+                    self._setOption("slide", function(event, ui) {
+                        callback(event, Math.pow(ui.value, self.options['logPower']));
+                    });
                 }
-            });
-        };
-
+            },
+            _setOption: function( key, value ) {
+                if (key === "maximum") {
+                    this._setOption("max", Math.pow(value, 1 / this.options['logPower']));
+                } else {
+                    this._super( key, value );
+                };
+            }
+        })
+        
         /* Updates a list of countries that satisfy the query criteria */
         function updateCountries() {
             countries = getRiskCountries(
@@ -37,57 +53,85 @@
             $("#countries").val(String(countries));
         };
 
-        /* Checks to find absolute maxima of slider values */
-        var data = getData();
-        var maxRoutes = 0;
-        for (var country in data.flights) {
-            if (data.flights.hasOwnProperty(country)) {
-                for (var adjCountry in data.flights[country]) {
-                    if (data.flights[country].hasOwnProperty(adjCountry)) {
-                        if (data.flights[country][adjCountry] > maxRoutes) {
-                            maxRoutes = data.flights[country][adjCountry];
+        function getMaxRoutes(data) {
+            var maxRoutes = 0;
+            for (var country in data.flights) {
+                if (data.flights.hasOwnProperty(country)) {
+                    for (var adjCountry in data.flights[country]) {
+                        if (data.flights[country].hasOwnProperty(adjCountry)) {
+                            if (data.flights[country][adjCountry] > maxRoutes) {
+                                maxRoutes = data.flights[country][adjCountry];
+                            }
                         }
                     }
                 }
             }
-        }
-        // Note: this check should be performed on a disease-by-disease basis
-        var maxCases = 0;
-        var disease = "ebola";
-        var diseaseData = data.cases[disease];
-        for (var date in diseaseData) {
-            if (diseaseData.hasOwnProperty(date)) {
-                var dateData = diseaseData[date];
-                for (var country in dateData) {
-                    if (dateData.hasOwnProperty(country)) {
-                        if (dateData[country] > maxCases) {
-                            maxCases = dateData[country];
+            return maxRoutes;
+        };
+
+        function getMaxCases(data, disease) {
+            var maxCases = 0;
+            var diseaseData = data.cases[disease];
+            for (var date in diseaseData) {
+                if (diseaseData.hasOwnProperty(date)) {
+                    var dateData = diseaseData[date];
+                    for (var country in dateData) {
+                        if (dateData.hasOwnProperty(country)) {
+                            if (dateData[country] > maxCases) {
+                                maxCases = dateData[country];
+                            }
                         }
                     }
                 }
             }
+            return maxCases;
         }
 
-        /* Initializes all of the logarithmic sliders */
+        function setSliderBounds(disease) {
+            var data = getData();
+            var maxCases = getMaxCases(data, disease);
+            var maxRoutes = getMaxRoutes(data);
+            $("#routes_slider").logSlider("option", "maximum", maxRoutes);
+            $("#local_cases_slider").logSlider("option", "maximum", maxCases);
+            $("#border_cases_slider").logSlider("option", "maximum", maxCases);
+        }
+
         $(function() {
-            logSlider("#routes_slider", maxRoutes, 2, function(event, value) {
-                $("#routes").val(value);
-                updateCountries();
+            /* Initializes logarithmic sliders */
+            $("#routes_slider").logSlider({
+                callback: function(event, value) {
+                    $("#routes").val(value);
+                },
             });
-            logSlider("#local_cases_slider", maxCases, 2, function(event, value) {
-                $("#local_cases").val(value);
-                updateCountries();
+            $("#local_cases_slider").logSlider({
+                callback: function(event, value) {
+                    $("#local_cases").val(value);
+                },
             });
-            logSlider("#border_cases_slider", maxCases, 2, function(event, value) {
-                $("#border_cases").val(value);
-                updateCountries();
+            $("#border_cases_slider").logSlider({
+                callback: function(event, value) {
+                    $("#border_cases").val(value);
+                },
             });
-        });
 
+            /* Initialize disease selector. */
+            var diseaseSelect = $("#disease_select").selectmenu({
+                change: function(event, ui) {
+                    console.log(ui.item.value);
+                    setSliderBounds(ui.item.value);
+                }
+            });
+            setSliderBounds(diseaseSelect.val());
+        });
     </script>
 </head>
 <body>
     <div>
+        <label for="disease">Disease</label>
+        <select name="disease" id="disease_select">
+            <option value="ebola">Ebola</option>
+            <option value="flu">Influenza</option>
+        </select>
         <div id="routes_slider" class="slider"></div>
         <p>
             <input type="text" id="routes" class="counter" readonly/>
