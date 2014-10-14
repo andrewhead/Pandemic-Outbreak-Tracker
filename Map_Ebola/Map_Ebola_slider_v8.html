@@ -36,23 +36,18 @@
 <script>
 
 function makeMap(data_ebola, geo_json) {
- 
-    
 
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: 'Map data (c) <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
     }).addTo(map);
 
+	// Create markers on the map.
 	//for (country in data_ebola) {
 	//	marker = L.marker(latlng[country]);
 	//	marker.bindPopup(country);
 	//	map.addLayer(marker);
 	//};
-	
-	var color = d3.scale.threshold()
-              .domain([1, 1000, 2000, 3000])
-              .range(['#F1EEF6', '#D4B9DA', '#C994C7', '#DF65B0', '#E7298A']);
 
 	function matchKey(datapoint, key_variable){
 		countryExists = key_variable[datapoint];
@@ -65,7 +60,7 @@ function makeMap(data_ebola, geo_json) {
 	
     function style_1(feature) {
 		return {
-			fillColor: color(matchKey(feature.id, data_ebola)),
+			fillColor: colorScale(matchKey(feature.id, data_ebola)),
 			weight: 1,
 			opacity: 0.2,
 			color: 'black',
@@ -88,7 +83,7 @@ function makeMap(data_ebola, geo_json) {
         .scale(x)
         .orient("top")
         .tickSize(1)
-        .tickValues(color.domain())
+        .tickValues(colorScale.domain());
 
     var svg = d3.select(".legend.leaflet-control").append("svg")
         .attr("id", 'legend')
@@ -100,10 +95,10 @@ function makeMap(data_ebola, geo_json) {
         .attr("transform", "translate(25,16)");
 
     g.selectAll("rect")
-        .data(color.range().map(function(d, i) {
+        .data(colorScale.range().map(function(d, i) {
 			return {
-				x0: i ? x(color.domain()[i - 1]) : x.range()[0],
-				x1: i < color.domain().length ? x(color.domain()[i]) : x.range()[1],
+				x0: i ? x(colorScale.domain()[i - 1]) : x.range()[0],
+				x1: i < colorScale.domain().length ? x(colorScale.domain()[i]) : x.range()[1],
 				z: d
 			};
         }))
@@ -120,9 +115,6 @@ function makeMap(data_ebola, geo_json) {
 };
 
 function updateMap(data_ebola, geo_json) {
-	var color = d3.scale.threshold()
-              .domain([1, 1000, 2000, 3000])
-              .range(['#F1EEF6', '#D4B9DA', '#C994C7', '#DF65B0', '#E7298A']);
 
 	function matchKey(datapoint, key_variable){
 		countryExists = key_variable[datapoint];
@@ -135,7 +127,7 @@ function updateMap(data_ebola, geo_json) {
 	
     function style_1(feature) {
 		return {
-			fillColor: color(matchKey(feature.id, data_ebola)),
+			fillColor: colorScale(matchKey(feature.id, data_ebola)),
 			weight: 1,
 			opacity: 0.2,
 			color: 'black',
@@ -143,10 +135,14 @@ function updateMap(data_ebola, geo_json) {
 		};
 	};
 
-    gJson_layer_1 = L.geoJson(geo_json, {style: style_1}).addTo(map);
+    gJson_layer_1.setStyle(style_1);
 };
 
 var map = L.map('map').setView([30, -20], 2);
+
+var colorScale = d3.scale.threshold()
+              .domain([1, 1000, 2000, 3000])
+              .range(['#F1EEF6', '#D4B9DA', '#C994C7', '#DF65B0', '#E7298A']);
 
 var geo_json = getGeojson();
 
@@ -162,7 +158,7 @@ $(function() {
 	var select = $( "#timestamp" );
 	var slider = $( "<div id='slider'></div>" ).insertAfter( select ).slider({
 		min: 1,
-		max: 81,
+		max: 79,
 		range: "min",
 		value: select[0].selectedIndex + 1,
 		slide: function( event, ui ) {
@@ -173,6 +169,8 @@ $(function() {
 	});
 	$( "#timestamp" ).change(function() {
 		slider.slider( "value", this.selectedIndex + 1 );
+		date = select[0][select[0].selectedIndex].value;
+		updateMap(data.cases.ebola[date], geo_json);
 	});
 	//console.log(select[ 0 ][select[ 0 ].selectedIndex].value);
 });
@@ -261,8 +259,6 @@ $(function() {
 		<option value="20141001">10/1/2014</option>
 		<option value="20141004">10/4/2014</option>
 		<option value="20141005">10/5/2014</option>
-		<option value="20141007">10/7/2014</option>
-		<option value="20141008">10/8/2014</option>
 	</select>
 </form>
 
