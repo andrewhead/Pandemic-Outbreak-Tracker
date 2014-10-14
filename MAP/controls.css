@@ -1,0 +1,16 @@
+.slider {
+    width: 200px;
+    margin-left: 20px;
+}
+
+input.counter {
+    border: 0;
+    font-weight: bold;
+    width: 40px;
+    text-align: center;
+}
+
+select {
+    font-size: smaller;
+    width: 200px;
+}
