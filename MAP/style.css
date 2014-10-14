@@ -1,0 +1,32 @@
+/* D3 Styling */
+.legend {
+    padding: 0px 0px;
+    font: 10px sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.key path {
+	display: none;
+}
+
+/* UI Styling */
+.slider {
+    width: 200px;
+    margin-left: 20px;
+}
+
+input.counter {
+    border: 0;
+    font-weight: bold;
+    width: 40px;
+    text-align: center;
+}
+
+select {
+    font-size: smaller;
+    width: 200px;
+}
+
