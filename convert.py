@@ -19,7 +19,7 @@ def convertLatLong(file_):
 
 def convertFlights(file_):
     flights = {}
-    reader = csv.DictReader(file_, delimiter=',')
+    reader = csv.DictReader(file_, delimiter=str(','))
     for line in reader:
         depCountry = line['country departure']
         arrCountry = line['country arrival']
@@ -62,14 +62,14 @@ def convertEbola(file_):
 
 def convertFlu(file_):
     cases = {}
-    reader = csv.DictReader(file_, delimiter=',')
+    reader = csv.DictReader(file_, delimiter=str(','))
     countryNames = reader.fieldnames[1:]
     for line in reader:
         dateString = line['Date'].replace("-", "")
         cases[dateString] = {}
         for name in countryNames:
             code = _getCountryCode(name)
-            cases[dateString][code] = line[name]
+            cases[dateString][code] = int(line[name])
     print json.dumps(cases, indent=4)
 
 
