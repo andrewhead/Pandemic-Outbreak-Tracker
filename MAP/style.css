@@ -69,5 +69,24 @@ h1,h2,h3,h4,h5,h6 {
 
 #param_col {
     margin: 0;
-    margin-top: 50px;
+    padding-top: 80px;
+}
+
+.cols {
+    margin: 0px auto;
+}
+
+.col {
+    float: left;
+}
+
+#main_cont {}
+
+#main_cols {
+    margin-top: 30px;
+    padding-bottom: 20px;
+}
+
+.ui-state-active {
+    background: #e9d1eb url("images/ui-bg_glass_65_ffffff_1x400.png") 50% 50% repeat-x
 }

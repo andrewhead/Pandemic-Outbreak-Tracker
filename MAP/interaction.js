@@ -62,7 +62,7 @@ function createLegent (L, map) {
     legend.addTo(map);
 
     var x = d3.scale.linear()
-    .domain([0, 4000])
+    .domain([0, getMaxCases(data, $("#disease_select").val())])
     .range([0, 400]);
 
     var xAxis = d3.svg.axis()
@@ -97,7 +97,7 @@ function createLegent (L, map) {
     g.call(xAxis).append("text")
         .attr("class", "caption")
         .attr("y", 21)
-        .text('Outbreaks Situation');
+        .text('Estimated Cases');
 };
 
 function plotMarkers(map, markersData) {
@@ -161,18 +161,21 @@ $(function() {
 
     /* Initialize logarithmic sliders */
     $("#routes_slider").logSlider({
+        min: 1,
         callback: function(event, value) {
             $("#routes").val(value);
             updateCountries(map);
         },
     });
     $("#local_cases_slider").logSlider({
+        min: 1,
         callback: function(event, value) {
             $("#local_cases").val(value);
             updateCountries(map);
         },
     });
     $("#border_cases_slider").logSlider({
+        min: 1,
         callback: function(event, value) {
             $("#border_cases").val(value);
             updateCountries(map);
@@ -206,7 +209,7 @@ $(function() {
         }
     });
 
-    updateSliders(diseaseSelect.val());
+    updateSliders(diseaseSelect.val(), reset=true);
     updateCountries(map);
 });
 
@@ -215,7 +218,7 @@ $.widget("custom.logSlider", $.ui.slider, {
     options: {
         min: 0,
         mx: 10000,
-        logPower: 5,
+        logPower: 2,
         step: 0.1,
         callback: undefined
     },
@@ -329,7 +332,7 @@ function getLifeExpectancyRange(data) {
     return [minExpectancy, maxExpectancy];
 }
 
-function updateSliders(disease) {
+function updateSliders(disease, reset) {
     var maxCases = getMaxCases(data, disease);
     var maxRoutes = getMaxRoutes(data);
     var expectancyRange = getLifeExpectancyRange(data);
@@ -346,10 +349,9 @@ function updateSliders(disease) {
             "<option value=" + dateStr + ">" + month + "/" + day + "/" + year + "</option>"
         );
     }
-    console.log("Date: " + $("#timestamp").val());
     $("#timestamp_slider").slider("option", {
         "max": sortedDates.length,
-        "value": 1
+        "value": 5
     });
     updateMap(data.cases[disease][$("#timestamp").val()], geo_json);
 
@@ -359,6 +361,14 @@ function updateSliders(disease) {
     $("#border_cases_slider").logSlider("option", "mx", maxCases);
     $("#life_exp_slider").slider("option", "min", expectancyRange[0]);
     $("#life_exp_slider").slider("option", "max", expectancyRange[1]);
+
+    if (reset) {
+        $("#routes_slider").logSlider("option", "vl", 500);
+        $("#local_cases_slider").logSlider("option", "vl", maxCases);
+        $("#border_cases_slider").logSlider("option", "vl", 100);
+        $("#life_exp_slider").slider("option", "min", expectancyRange[0]);
+        $("#life_exp_slider").slider("option", "max", expectancyRange[1]);
+    }
 
     // Initialize or reset values as needed
     if ($("#min_life_exp").val() === "" || $("#max_life_exp").val() === "") {

@@ -17,66 +17,83 @@
 </head>
 
 <body>
-    <div id="cols" style="margin:0px auto; width:80%;">
-        <div class="col" style="float:left; margin:0; width:60%">
-            <h1>Pandemic Outbreak Predictor</h1>
-            <div id="map"></div>
-            <div style="width:90%;" class="centerer">
-                <form id="ebola_timestamp">
-                    <label for="timestamp">Date in Outbreak</label>
-                    <select disabled name="timestamp" id="timestamp" class="space_below"></select>
-                </form>
-            </div>
-            <div style="width: 50%; margin:0px auto;" id="timestamp_slider"></div>
-        </div>
-        <div id="param_col" class="col" style="float:left;">
+    <div id="main_cont" style="width: 70%; margin: 0px auto;">
 
-            <h3>Disease</h3>
-            <div class="centerer">
-                <select name="disease" id="disease_select">
-                    <option value="ebola">Ebola</option>
-                    <option value="flu">Influenza</option>
-                </select>
+        <div id="main_cols" padding-bottom: 20px; class="cols" style="width: 100%; float:left; border: 1px solid black;">
+
+            <div class="col" style="margin:0; width:75%;">
+
+                <h1>Pandemic Outbreak Predictor</h1>
+                <div id="map"></div>
+
+                <div class="cols" style="width:80%;">
+                    <div class="col centerer" style="width: 30%">
+                        <p>Choose Disease</p>
+                        <select name="disease" id="disease_select">
+                            <option value="ebola">Ebola</option>
+                            <option value="flu">Influenza</option>
+                        </select>
+                    </div>
+
+                    <div class="col centerer" style="width: 70%">
+                        <form id="ebola_timestamp">
+                            <p></p>
+                            <label for="timestamp">Date in Outbreak</label>
+                            <select disabled name="timestamp" id="timestamp" class="space_below"></select>
+                        </form>
+                        <div style="margin:0px auto;" id="timestamp_slider"></div>
+                    </div>
+
+                </div>
+
             </div>
 
-            <h3>Severity</h3>
-            <div class="centerer">
-                    <div id="local_cases_slider" class="slider"></div>
-            </div>
-            <p class="centerer">
-                <input type="text" id="local_cases" class="counter" readonly/>
-                <label for="local_cases">cases or more in country</label>
-            </p>
-            <div class="centerer">
-                <div id="border_cases_slider" class="slider"></div>
-            </div>
-            <p class="centerer">
-                <input type="text" id="border_cases" class="counter" readonly/>
-                <label for="border_cases">cases or more in bordering country</label>
-            </p>
+            <div id="param_col" class="col" style="width: 20%; height: 100%;">
 
-            <h3>Country Resistivity</h3>
-            <div class="centerer">
-                <div id="life_exp_slider" class="slider"></div>
-            </div>
-            <p class="centerer">
-                <input type="text" id="min_life_exp" class="counter" readonly/>
-                <label>&nbsp;to&nbsp;</label>
-                <input type="text" id="max_life_exp" class="counter" readonly/>
-                <label for="life_exp">years life expectancy</label>
-            </p>
+                <h2>Risk Assessment Filters</h2>
 
-            <h3>Border Conditions</h3>
-            <div class="centerer">
-                <input type="checkbox" id="border"><label class="space_below" id="border_label" for="border">Consider border</label>
+                <h3>Disease Severity</h3>
+                <div class="centerer">
+                    <div id="border_cases_slider" class="slider"></div>
+                </div>
+                <p class="centerer">
+                    <input type="text" id="border_cases" class="counter" readonly/>
+                    <label for="border_cases">cases or more in bordering country</label>
+                </p>
+                <div class="centerer">
+                        <div id="local_cases_slider" class="slider"></div>
+                </div>
+                <p class="centerer">
+                    <input type="text" id="local_cases" class="counter" readonly/>
+                    <label for="local_cases">cases or more in country</label>
+                </p>
+                <hr/>
+
+                <h3>Border Risk Conditions</h3>
+                <div class="centerer">
+                    <input type="checkbox" id="border"><label class="space_below" id="border_label" for="border">Adjacent Countries</label>
+                </div>
+                <div class="centerer">
+                    <div id="routes_slider" class="slider"></div>
+                </div>
+                <p class="centerer">
+                    <input type="text" id="routes" class="counter" readonly/>
+                    <label for="routes">flight routes from affected country</label>
+                </p>
+                <hr/>
+
+                <h3>Country Resistivity</h3>
+                <div class="centerer">
+                    <div id="life_exp_slider" class="slider"></div>
+                </div>
+                <p class="centerer">
+                    <input type="text" id="min_life_exp" class="counter" readonly/>
+                    <label>&nbsp;to&nbsp;</label>
+                    <input type="text" id="max_life_exp" class="counter" readonly/>
+                    <label for="life_exp">years life expectancy</label>
+                </p>
+
             </div>
-            <div class="centerer">
-                <div id="routes_slider" class="slider"></div>
-            </div>
-            <p class="centerer">
-                <input type="text" id="routes" class="counter" readonly/>
-                <label for="routes">flight routes from affected country</label>
-            </p>
         </div>
     </div>
 </body>
