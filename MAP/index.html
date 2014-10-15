@@ -24,14 +24,16 @@
             <div class="col" style="margin:0; width:75%;">
 
                 <h1>Pandemic Outbreak Predictor</h1>
+                <p style="text-align:center; font-size: large;">Color shows estimated cases. <img src="red.png"> shows region outbreak prediction based on risk criteria.</p>
+
                 <div id="map"></div>
 
                 <div class="cols" style="width:80%;">
                     <div class="col centerer" style="width: 30%">
                         <p>Choose Disease</p>
                         <select name="disease" id="disease_select">
-                            <option value="ebola">Ebola</option>
                             <option value="flu">Influenza</option>
+                            <option value="ebola">Ebola</option>
                         </select>
                     </div>
 
@@ -71,7 +73,7 @@
 
                 <h3>Border Risk Conditions</h3>
                 <div class="centerer">
-                    <input type="checkbox" id="border"><label class="space_below" id="border_label" for="border">Adjacent Countries</label>
+                    <input type="checkbox" id="border"><label class="space_below" id="border_label" for="border">Adjacency</label>
                 </div>
                 <div class="centerer">
                     <div id="routes_slider" class="slider"></div>

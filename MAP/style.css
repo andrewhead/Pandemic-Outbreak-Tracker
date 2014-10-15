@@ -83,10 +83,10 @@ h1,h2,h3,h4,h5,h6 {
 #main_cont {}
 
 #main_cols {
-    margin-top: 30px;
+    margin-top: 50px;
     padding-bottom: 20px;
 }
 
 .ui-state-active {
-    background: #e9d1eb url("images/ui-bg_glass_65_ffffff_1x400.png") 50% 50% repeat-x
+    background: #e9d1eb 50% 50% repeat-x
 }

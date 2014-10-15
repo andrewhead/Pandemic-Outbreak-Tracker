@@ -1,11 +1,24 @@
 /* Globals */
-var colorScale = d3.scale.threshold()
-              .domain([1, 1000, 2000, 3000])
-              .range(['#F1EEF6', '#D4B9DA', '#C994C7', '#DF65B0', '#E7298A']);
 var data = getData();
 var geo_json = getGeojson();
 var latlng = getLatlng();
 var markerLayers = [];
+var legend;
+
+function getColorScale() {
+    var INCREMENTS = 4;
+    var maxCases = getMaxCases(data, $("#disease_select").val());
+    var casesPerIncrement = Math.ceil(maxCases / (INCREMENTS * 1000)) * 1000;
+    var domain = [1];
+    for (var i = 0; i < INCREMENTS; i++) {
+        domain.push(casesPerIncrement * (i + 1));
+    }
+    var scale = d3.scale.threshold()
+        .domain(domain)
+        .range(['#F1EEF6', '#D4B9DA', '#C994C7', '#DF65B0', '#E7298A']);
+    scale.domainMax = domain[domain.length - 1];
+    return scale;
+}
 
 function makeMap(L, map, disease_data, geo_json) {
 
@@ -20,7 +33,7 @@ function makeMap(L, map, disease_data, geo_json) {
 	
     function style_1(feature) {
 		return {
-			fillColor: colorScale(matchKey(feature.id, disease_data)),
+			fillColor: getColorScale()(matchKey(feature.id, disease_data)),
 			weight: 1,
 			opacity: 0.2,
 			color: 'black',
@@ -44,7 +57,7 @@ function updateMap(disease_data, geo_json) {
 	
     function style_1(feature) {
 		return {
-			fillColor: colorScale(matchKey(feature.id, disease_data)),
+			fillColor: getColorScale()(matchKey(feature.id, disease_data)),
 			weight: 1,
 			opacity: 0.2,
 			color: 'black',
@@ -56,14 +69,19 @@ function updateMap(disease_data, geo_json) {
 };
 
 function createLegent (L, map) {
-	var legend = L.control({position: 'topright'});
 
+    var colorScale = getColorScale();
+
+    if (legend !== undefined) {
+        map.removeControl(legend);
+    }
+	legend = L.control({position: 'topright'});
     legend.onAdd = function (map) {var div = L.DomUtil.create('div', 'legend'); return div};
     legend.addTo(map);
 
     var x = d3.scale.linear()
-    .domain([0, getMaxCases(data, $("#disease_select").val())])
-    .range([0, 400]);
+        .domain([0, colorScale.domainMax])
+        .range([0, 400]);
 
     var xAxis = d3.svg.axis()
         .scale(x)
@@ -192,11 +210,6 @@ $(function() {
         }
     });
     $("#border").button().click(function() {
-        if ($(this).data("clicked") === undefined) {
-            $(this).data("clicked", true);
-        } else {
-            $(this).data("clicked", !$(this).data("clicked"));
-        }
         updateCountries(map);
     })
     $("#border_label").attr("unselectable", "on")
@@ -206,6 +219,7 @@ $(function() {
     var diseaseSelect = $("#disease_select").selectmenu({
         change: function(event, ui) {
             updateSliders(ui.item.value);
+            createLegent(L, map);
         }
     });
 
@@ -264,7 +278,7 @@ function updateCountries(map) {
         minLifeExpectancy=Number($("#min_life_exp").val()),
         maxLifeExpectancy=Number($("#max_life_exp").val()),
         minRoutesInto=Number($("#routes").val()),
-        considerBorderRisk=($("#border").data("clicked")),
+        considerBorderRisk=($("#border").prop("checked")),
         minLocalCases=Number($("#local_cases").val()),
         borderingCases=Number($("#border_cases").val())
     );
@@ -349,10 +363,11 @@ function updateSliders(disease, reset) {
             "<option value=" + dateStr + ">" + month + "/" + day + "/" + year + "</option>"
         );
     }
-    $("#timestamp_slider").slider("option", {
+    var tsSlider = $("#timestamp_slider").slider("option", {
         "max": sortedDates.length,
-        "value": 5
+        "value": sortedDates.length / 10
     });
+    tsSlider.slider("option", "slide")(null, {value: tsSlider.slider("value")});
     updateMap(data.cases[disease][$("#timestamp").val()], geo_json);
 
     // Set maximum and minimum slider values
@@ -363,8 +378,9 @@ function updateSliders(disease, reset) {
     $("#life_exp_slider").slider("option", "max", expectancyRange[1]);
 
     if (reset) {
+        $("#border").prop("checked", true);
         $("#routes_slider").logSlider("option", "vl", 500);
-        $("#local_cases_slider").logSlider("option", "vl", maxCases);
+        $("#local_cases_slider").logSlider("option", "vl", 100);
         $("#border_cases_slider").logSlider("option", "vl", 100);
         $("#life_exp_slider").slider("option", "min", expectancyRange[0]);
         $("#life_exp_slider").slider("option", "max", expectancyRange[1]);
