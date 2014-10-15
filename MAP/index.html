@@ -19,57 +19,65 @@
 <body>
     <div id="cols" style="margin:0px auto; width:80%;">
         <div class="col" style="float:left; margin:0; width:60%">
-            <h1 style="text-align: center;">Pandemic Outbreak Tracker</h1>
-            <div id="map" style="width: 95%; height: 500px; margin:0px auto; margin-bottom: 20px;"></div>
-            <div style="width:90%; margin:0px auto;">
+            <h1>Pandemic Outbreak Predictor</h1>
+            <div id="map"></div>
+            <div style="width:90%;" class="centerer">
                 <form id="ebola_timestamp">
-                    <label for="timestamp">Date</label>
-                    <select disabled name="timestamp" id="timestamp" style="margin-bottom: 20px;"></select>
+                    <label for="timestamp">Date in Outbreak</label>
+                    <select disabled name="timestamp" id="timestamp" class="space_below"></select>
                 </form>
             </div>
             <div style="width: 50%; margin:0px auto;" id="timestamp_slider"></div>
         </div>
-        <div class="col" style="float:left; margin:0;">
+        <div id="param_col" class="col" style="float:left;">
 
-            <h2>Disease</h2>
-            <select name="disease" id="disease_select">
-                <option value="ebola">Ebola</option>
-                <option value="flu">Influenza</option>
-            </select>
+            <h3>Disease</h3>
+            <div class="centerer">
+                <select name="disease" id="disease_select">
+                    <option value="ebola">Ebola</option>
+                    <option value="flu">Influenza</option>
+                </select>
+            </div>
 
-            <h2>Proximity</h2>
-            <input type="checkbox" id="border"><label id="border_label" for="border">Consider border</label>
-            <div id="routes_slider" class="slider"></div>
-            <p>
-                <input type="text" id="routes" class="counter" readonly/>
-                <label for="routes">flight routes from affected country</label>
-            </p>
-
-            <h2>Severity</h2>
-            <div id="local_cases_slider" class="slider"></div>
-            <p>
+            <h3>Severity</h3>
+            <div class="centerer">
+                    <div id="local_cases_slider" class="slider"></div>
+            </div>
+            <p class="centerer">
                 <input type="text" id="local_cases" class="counter" readonly/>
                 <label for="local_cases">cases or more in country</label>
             </p>
-            <div id="border_cases_slider" class="slider"></div>
-            <p>
+            <div class="centerer">
+                <div id="border_cases_slider" class="slider"></div>
+            </div>
+            <p class="centerer">
                 <input type="text" id="border_cases" class="counter" readonly/>
                 <label for="border_cases">cases or more in bordering country</label>
             </p>
 
-            <h2>Country Stability</h2>
-            <div id="life_exp_slider" class="slider"></div>
-            <p>
+            <h3>Country Resistivity</h3>
+            <div class="centerer">
+                <div id="life_exp_slider" class="slider"></div>
+            </div>
+            <p class="centerer">
                 <input type="text" id="min_life_exp" class="counter" readonly/>
                 <label>&nbsp;to&nbsp;</label>
                 <input type="text" id="max_life_exp" class="counter" readonly/>
                 <label for="life_exp">years life expectancy</label>
-            <p>
-                <label for="countries">At-risk countries</label>
-                <input type="text" id="countries" readonly/>
+            </p>
+
+            <h3>Border Conditions</h3>
+            <div class="centerer">
+                <input type="checkbox" id="border"><label class="space_below" id="border_label" for="border">Consider border</label>
+            </div>
+            <div class="centerer">
+                <div id="routes_slider" class="slider"></div>
+            </div>
+            <p class="centerer">
+                <input type="text" id="routes" class="counter" readonly/>
+                <label for="routes">flight routes from affected country</label>
             </p>
         </div>
     </div>
-
 </body>
 </html>

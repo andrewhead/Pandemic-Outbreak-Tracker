@@ -13,6 +13,13 @@
 }
 
 /* UI Styling */
+#map {
+    width: 95%;
+    height: 500px;
+    margin: 0px auto;
+    margin-bottom: 20px;
+}
+
 .slider {
     width: 200px;
     margin-left: 20px;
@@ -20,13 +27,47 @@
 
 input.counter {
     border: 0;
-    font-weight: bold;
     width: 40px;
+    font-weight: bold;
+    font-size: small;
     text-align: center;
 }
 
-select {
+.slider {
     font-size: smaller;
-    width: 200px;
+    width: 80%;
+    display: inline-block;
 }
 
+#timestamp {
+    width: 30%;
+    margin-left: 10px;
+    font-size: medium;
+    text-align: center;
+}
+
+label, p,h1,h2,h3,h4,h5,h6 {
+    font-family: "Helvetica", "Arial", sans-serif;
+}
+
+h1,h2,h3,h4,h5,h6 {
+    text-align: center;
+}
+
+.space_below {
+    margin-bottom: 20px;
+}
+
+#disease_select {
+    width: 80%;
+    display: inline-block;
+}
+
+.centerer {
+    text-align: center;
+}
+
+#param_col {
+    margin: 0;
+    margin-top: 50px;
+}
